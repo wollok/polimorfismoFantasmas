@@ -1,0 +1,20 @@
+import example.*
+
+
+test "vilma y el fantasma del aula" {
+    
+    fantasma.irA(aula)
+    fantasma.asustar()
+	assert.that(vilma.estaDesmayada())
+
+}
+
+
+test "fantasma en el buffet" {
+    
+    buffet.entra(shaggy)
+    fantasma.irA(buffet)
+    fantasma.asustar()
+	assert.notThat(shaggy.estaDesmayada())
+
+}
