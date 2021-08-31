@@ -3,23 +3,48 @@ import wollok.game.*
 
 
 object pantalla {
-	
+	const ancho = 20
+	const alto = 10
 	
 	method iniciar() {
-      game.height(10)
-      game.width(20)
+      game.height(alto)
+      game.width(ancho )
       game.title("fantasmas")
       game.addVisual(vilma)
       game.addVisual(fantasma)
+      game.addVisual(shaggy)
+      game.addVisual(dafne)
+      game.addVisual(fred)
+      game.boardGround("img/universidad.png")
+      
       keyboard.left().onPressDo({vilma.moverseIzquierda() })
       keyboard.right().onPressDo({vilma.moverseDerecha() })
       keyboard.space().onPressDo({vilma.perderLucidez() })
+      keyboard.s().onPressDo({shaggy.buscaFantasma()})
       
       game.onCollideDo(fantasma,{algo => algo.perderLucidez()  })
       
+      game.schedule(5000,{fantasma.siNoAtrapasteANadieDesenmascarate()})
+      game.onTick(1000, "movimientoFantasma",{fantasma.moverse()} )
+      fred.animar()
       game.start()
       
+      
+      
 	}
+	
+	method queNoSeSalga(posicion){
+		var nuevaPos = posicion
+		if(posicion.x() >= ancho) nuevaPos = game.at(ancho-1,nuevaPos.y())
+		if(posicion.x() < 0) nuevaPos = game.at(0,nuevaPos.y())
+		if(posicion.y() >= alto) nuevaPos = game.at(nuevaPos.x(),alto-1)
+		if(posicion.y() < 0) nuevaPos = game.at(nuevaPos.x(),0)
+		return nuevaPos
+		
+	}  
+	// nuevaPos.x(posicion.x().min(ancho-1).max(0))
+	// nuevaPos.y(posicion.y().min(alto-1).max(0))
+	
 	
 	
 	
@@ -69,7 +94,11 @@ object vilma{
 
 object fantasma {
 	
+	var position = game.origin()
 	var dondeEsta = buffet
+	var atrapo = false
+	const identidadSecreta = [dafne,shaggy,vilma].anyOne()
+	var image = "img/fantasmaresized.png"
 	
 	method irA(unLugar){
 		dondeEsta = unLugar
@@ -80,13 +109,29 @@ object fantasma {
 		dondeEsta.seAsustanTodos()
 		
 	}
-	
-	method position() {
-		return game.at(15,5)
+	method atrapar() {
+		atrapo = true
 	}
 	
-	method image() { return "img/fantasmaresized.png" }
+	method position() {
+		return position
+	}
 	
+	method image() { return image }
+	
+	method moverse(){
+		const vertical = (-5..5).anyOne()
+		const horizontal = (-5..5).anyOne()
+		position = pantalla.queNoSeSalga(position.right(horizontal).up(vertical))
+		
+	}
+	method siNoAtrapasteANadieDesenmascarate() {
+		if(!atrapo) self.desenmascarate()
+	}
+	method desenmascarate(){
+		image = identidadSecreta.image()
+		game.removeTickEvent("movimientoFantasma")
+	}
 }
 
 
@@ -126,20 +171,57 @@ object buffet {
 
 
 object shaggy{
-    method perderLucidez() {}
+    var position = game.at(1,1)
+    var asustado = false
     
+    method perderLucidez() {
+    	asustado = true
+    	game.schedule(3000, {asustado= false})
+    }
+        
     method estaDesmayada() {
     	return false
     }
     method reaccionar() {}
+    
+    method image() {
+    	return if(asustado)  "img/shaggyAsustado.jpg" else "img/shaggy.png"
+    }
+    
+    method position() {
+    	return position
+    }
+    method buscaFantasma() {
+	    position = fantasma.position()
+    }
 }
 
 object dafne {
 	
-	var aburrido = false
+	 method perderLucidez() {
+    	game.removeVisual(self)
+    }
+    
+    method position() = vilma.position().up(1)
+    
+    method image() = "img/dafne.jpg"
+    
 	
-	method reaccionar() {
-		aburrido = true
+}
+
+
+object fred {
+	
+	var nro = 1
+	
+	method position() = game.at(15,1)
+	
+	method image() = "img/fred"+ nro + ".png"
+	
+	
+	method animar() {
+		
+		game.onTick(200,"fredSeMueve",{nro = (nro + 1) % 3 + 1})
 	}
 	
 }
