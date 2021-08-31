@@ -1,7 +1,40 @@
+import wollok.game.*
+
+
+
+object pantalla {
+	
+	
+	method iniciar() {
+      game.height(10)
+      game.width(20)
+      game.title("fantasmas")
+      game.addVisual(vilma)
+      game.addVisual(fantasma)
+      keyboard.left().onPressDo({vilma.moverseIzquierda() })
+      keyboard.right().onPressDo({vilma.moverseDerecha() })
+      keyboard.space().onPressDo({vilma.perderLucidez() })
+      
+      game.onCollideDo(fantasma,{algo => algo.perderLucidez()  })
+      
+      game.start()
+      
+	}
+	
+	
+	
+}
+
+
+
+
+
 
 
 object vilma{
-		
+	
+	
+	var position = game.center()
 	var lucidez = 100
 	
 	method estaDesmayada() {
@@ -9,7 +42,27 @@ object vilma{
 	}
 	method perderLucidez() {
 		lucidez = lucidez - 80	
+		10.times( {x =>	
+			self.moverseDerecha()
+			game.schedule( x*x*20, {self.moverseIzquierda()})
+			})
 	}
+	
+	method position(){
+		return position
+	}
+	method image(){
+		return "img/vilma.gif"
+	} 
+	
+	method moverseDerecha(){
+		position = position.right(1)
+	}
+	method moverseIzquierda(){
+		position = position.left(1)
+	}
+	
+
 	
 }
 
@@ -27,6 +80,13 @@ object fantasma {
 		dondeEsta.seAsustanTodos()
 		
 	}
+	
+	method position() {
+		return game.at(15,5)
+	}
+	
+	method image() { return "img/fantasmaresized.png" }
+	
 }
 
 
