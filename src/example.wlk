@@ -76,4 +76,10 @@ object shaggy{
 
 object dafne {
 	
+	var aburrido = false
+	
+	method reaccionar() {
+		aburrido = true
+	}
+	
 }
